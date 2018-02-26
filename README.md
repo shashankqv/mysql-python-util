@@ -9,8 +9,9 @@ Execute an insert / update query with an option to manually commit the result. B
 
 Usage : 
 --------
-
+```
 python insert_update.py --query "your_query"
+```
 
 
 Development :
@@ -19,5 +20,6 @@ This runs on python 2.7 versions.
 
 Install Dependencies :
 --------------------
-
+```
 pip install -r requirements.txt
+```
