@@ -2,6 +2,8 @@
 
 Note : It's under development. 
 
+Blog Link : https://shashankvivek.in/2022/07/11/using-python-to-execute-mysql-insert-and-update-queries/
+
 This is a MySQL command line utility project written in Python. 
 
 You can do below things.
