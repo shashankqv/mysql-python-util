@@ -3,40 +3,56 @@ import sys
 import argparse
 from mysql_config import DB_MYSQL
 
-db = MySQLdb.connect(host=DB_MYSQL['host'],
-                     user=DB_MYSQL['user'],
-                     passwd=DB_MYSQL['passwd'],
-                     db=DB_MYSQL['database'])
+def get_db_connection():
+    """
+    Establish and return a new MySQL database connection.
+    """
+    return MySQLdb.connect(
+        host=DB_MYSQL['host'],
+        user=DB_MYSQL['user'],
+        passwd=DB_MYSQL['passwd'],
+        db=DB_MYSQL['database']
+    )
 
+def execute_update_query(query: str) -> bool:
+    """
+    Executes an INSERT or UPDATE query with manual commit confirmation.
 
-def execute_update_query(query):
+    Args:
+        query (str): The SQL query to execute.
+
+    Returns:
+        bool: True if committed, False if rolled back.
+    """
+    db = get_db_connection()
     try:
-        cur = db.cursor()
-        cur.execute(query)
-        nums_of_rows_effected = cur.rowcount
-        print "Total number of rows to be commited is : %s" % nums_of_rows_effected
-        user_input = raw_input("Proceed with commiting (y/n) : ")
-        if user_input.lower() == 'y':
-            db.commit()
-            print("Commited !!")
-        elif user_input.lower() == 'n':
-            db.rollback()
-            print("Rolled Back")
-        else:
-            print("Invalid Option. \n Valid Options are y and n")
-            db.rollback()
-            sys.exit(1)
-    except KeyboardInterrupt as ke:
+        with db.cursor() as cur:
+            cur.execute(query)
+            nums_of_rows_effected = cur.rowcount
+            print("Total number of rows to be committed is: %s" % nums_of_rows_effected)
+            user_input = raw_input("Proceed with committing (y/n): ")
+            if user_input.lower() == 'y':
+                db.commit()
+                print("Committed!")
+                return True
+            elif user_input.lower() == 'n':
+                db.rollback()
+                print("Rolled Back")
+                return False
+            else:
+                print("Invalid Option. Valid Options are y and n")
+                db.rollback()
+                sys.exit(1)
+    except KeyboardInterrupt:
         db.rollback()
+        print("Interrupted. Rolled Back")
         sys.exit(1)
     except Exception as e:
-        print e
-
+        db.rollback()
+        print("Error:", e)
+        sys.exit(1)
     finally:
         db.close()
-
-    return True
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Insert / Update MySQL queries from here.')
